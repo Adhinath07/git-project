@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Ballot - {{ election.title }}{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="card ballot-card">
+    <h1>{{ election.title }}</h1>
+    <p class="muted">{{ election.description or 'Select one candidate and submit your ballot.' }}</p>
+    <form method="post" data-confirm="Submit your vote? You cannot change it afterwards.">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% for c in candidates %}
+        <label class="choice">
+          <input type="radio" name="candidate_id" value="{{ c.id }}" required>
+          <span><strong>{{ c.name }}</strong>{% if c.description %}<span class="muted small">{{ c.description }}</span>{% endif %}</span>
+        </label>
+      {% endfor %}
+      <div class="form-actions">
+        <button class="btn" type="submit">Submit ballot</button>
+        <a class="btn secondary" href="{{ url_for('vote_list') }}">Cancel</a>
+      </div>
+      <p class="hint">Your vote is final. Your choice is stored without your name attached.</p>
+    </form>
+  </div>
+</div>
+{% endblock %}
