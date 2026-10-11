@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Manage candidates{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head"><div><h1>Manage candidates</h1><p class="muted">Candidates can only be changed while an election is a draft.</p></div></div>
+
+  {% if not elections %}
+    <div class="card empty">Create an election first. <a href="{{ url_for('manage_elections') }}">Go to elections</a></div>
+  {% else %}
+  <div class="card">
+    <form method="get" action="{{ url_for('manage_candidates') }}">
+      <label for="election">Election</label>
+      <select id="election" name="election">
+        {% for e in elections %}
+          <option value="{{ e.id }}" {{ 'selected' if selected and selected.id == e.id }}>{{ e.title }} ({{ e.status }})</option>
+        {% endfor %}
+      </select>
+      <div class="form-actions"><button class="btn sm secondary" type="submit">Show candidates</button></div>
+    </form>
+  </div>
+
+  {% if selected %}
+  <div class="grid cols-2 mt">
+    <div class="card">
+      <h2>Add candidate</h2>
+      {% if selected.status == 'draft' %}
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="election_id" value="{{ selected.id }}">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" minlength="2" maxlength="80" required>
+        <label for="description">Short description (optional)</label>
+        <textarea id="description" name="description" maxlength="500"></textarea>
+        <div class="form-actions"><button class="btn" type="submit">Add candidate</button></div>
+      </form>
+      {% else %}
+        <p class="muted">This election is {{ selected.status }}, so its candidate list is locked.</p>
+      {% endif %}
+    </div>
+
+    <div class="card table-wrap">
+      <h2>Candidates in "{{ selected.title }}"</h2>
+      {% if candidates %}
+      <table>
+        <tbody>
+        {% for c in candidates %}
+          <tr>
+            <td><strong>{{ c.name }}</strong>{% if c.description %}<div class="muted small">{{ c.description }}</div>{% endif %}</td>
+            <td>
+              {% if selected.status == 'draft' %}
+              <form method="post" action="{{ url_for('delete_candidate', candidate_id=c.id) }}" class="inline" data-confirm="Remove this candidate?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn sm danger" type="submit">Remove</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <div class="empty">No candidates yet.</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
