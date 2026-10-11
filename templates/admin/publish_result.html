@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Publish results{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head"><div><h1>Publish results</h1><p class="muted">Only you can see live tallies. Results become public once the election is closed and you publish them.</p></div></div>
+  {% for item in data %}
+    {% set e = item.election %}
+    <div class="card">
+      <div class="page-head tight">
+        <div>
+          <h2>{{ e.title }}</h2>
+          <span class="pill {{ e.status }}">{{ e.status }}</span>
+          {% if e.results_published %}<span class="pill published">published</span>{% endif %}
+          <span class="muted small"> · {{ item.total }} vote{{ '' if item.total == 1 else 's' }} · {{ item.turnout }}% turnout</span>
+        </div>
+        <div class="row-actions">
+          {% if e.results_published %}
+            <a class="btn sm secondary" href="{{ url_for('result_detail', election_id=e.id) }}">View public page</a>
+            <form method="post" action="{{ url_for('set_result_visibility', election_id=e.id) }}" class="inline" data-confirm="Hide these results from the public?">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="unpublish">
+              <button class="btn sm danger" type="submit">Unpublish</button>
+            </form>
+          {% elif e.status == 'closed' %}
+            <form method="post" action="{{ url_for('set_result_visibility', election_id=e.id) }}" class="inline" data-confirm="Publish these results for everyone to see?">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="publish">
+              <button class="btn sm" type="submit">Publish results</button>
+            </form>
+          {% else %}
+            <span class="muted small">Close the election to publish</span>
+          {% endif %}
+        </div>
+      </div>
+      {% for r in item.rows %}
+        <div class="result-row">
+          <div class="result-top">
+            <span class="{{ 'winner' if r.id in item.winners }}">{{ r.name }}{% if r.id in item.winners %} &#127942;{% endif %}</span>
+            <span>{{ r.votes }} · {{ r.percent }}%</span>
+          </div>
+          <progress max="100" value="{{ r.percent }}">{{ r.percent }}%</progress>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card empty">No open or closed elections yet.</div>
+  {% endfor %}
+</div>
+{% endblock %}
