@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Results - {{ election.title }}{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <div><h1>{{ election.title }}</h1><p class="muted">{{ election.description }}</p></div>
+    <a class="btn secondary" href="{{ url_for('result') }}">All results</a>
+  </div>
+  <div class="grid cols-3">
+    <div class="card stat"><div class="num">{{ total }}</div><div class="label">Votes cast</div></div>
+    <div class="card stat"><div class="num">{{ turnout }}%</div><div class="label">Turnout of registered voters</div></div>
+    <div class="card stat"><div class="num">{{ winners|length if winners else '-' }}</div><div class="label">{{ 'Tied for first' if winners|length > 1 else 'Winner' }}</div></div>
+  </div>
+  <div class="card mt">
+    {% for r in rows %}
+      <div class="result-row">
+        <div class="result-top">
+          <span class="{{ 'winner' if r.id in winners }}">{{ r.name }}{% if r.id in winners %} &#127942;{% endif %}</span>
+          <span>{{ r.votes }} vote{{ '' if r.votes == 1 else 's' }} · {{ r.percent }}%</span>
+        </div>
+        <progress max="100" value="{{ r.percent }}">{{ r.percent }}%</progress>
+      </div>
+    {% else %}
+      <div class="empty">No candidates.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
