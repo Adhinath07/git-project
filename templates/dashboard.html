@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Hello, {{ g.user.username }}</h1>
+      <p class="muted">Here is what is happening in your elections.</p>
+    </div>
+    {% if open_pending %}<a class="btn" href="{{ url_for('vote_list') }}">Vote now ({{ open_pending }})</a>{% endif %}
+  </div>
+
+  <div class="grid cols-3">
+    <div class="card stat"><div class="num">{{ open_pending }}</div><div class="label">Elections waiting for your vote</div></div>
+    <div class="card stat"><div class="num">{{ voted_count }}</div><div class="label">Elections you voted in</div></div>
+    <div class="card stat"><div class="num">{{ elections|length }}</div><div class="label">Open or finished elections</div></div>
+  </div>
+
+  <div class="card table-wrap mt">
+    <h2>Elections</h2>
+    {% if elections %}
+    <table>
+      <thead><tr><th>Election</th><th>Status</th><th>Your vote</th><th></th></tr></thead>
+      <tbody>
+      {% for e in elections %}
+        <tr>
+          <td>{{ e.title }}</td>
+          <td><span class="pill {{ e.status }}">{{ e.status }}</span></td>
+          <td>{% if e.voted %}Cast{% elif e.status == 'open' %}Not yet{% else %}-{% endif %}</td>
+          <td>
+            {% if e.status == 'open' and not e.voted %}
+              <a class="btn sm" href="{{ url_for('vote', election_id=e.id) }}">Vote</a>
+            {% elif e.results_published %}
+              <a class="btn sm secondary" href="{{ url_for('result_detail', election_id=e.id) }}">View results</a>
+            {% elif e.status == 'closed' %}
+              <span class="muted small">Results pending</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty">No elections yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

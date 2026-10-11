@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Vote{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head"><div><h1>Vote</h1><p class="muted">Choose an open election to cast your ballot. You can vote once per election.</p></div></div>
+  {% if elections %}
+    <div class="grid cols-2">
+      {% for e in elections %}
+        <div class="card">
+          <h2>{{ e.title }}</h2>
+          <p class="muted small">{{ e.description or 'No description.' }}</p>
+          <p class="small">{{ e.n_candidates }} candidate{{ '' if e.n_candidates == 1 else 's' }}</p>
+          {% if e.voted %}
+            <span class="pill published">You have voted</span>
+          {% else %}
+            <a class="btn" href="{{ url_for('vote', election_id=e.id) }}">Cast your vote</a>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card empty">There are no open elections right now.</div>
+  {% endif %}
+</div>
+{% endblock %}
