@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head"><div><h1>Your profile</h1><p class="muted">Member since {{ g.user.created_at|dt }}</p></div></div>
+  <div class="grid cols-2">
+    <div class="card">
+      <h2>Account</h2>
+      <p><strong>Username:</strong> {{ g.user.username }}<br>
+         <strong>Role:</strong> {{ g.user.role }}</p>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="email">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="{{ g.user.email }}" maxlength="120" required>
+        <div class="form-actions"><button class="btn" type="submit">Update email</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Change password</h2>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="password">
+        <label for="current_password">Current password</label>
+        <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
+        <label for="new_password">New password</label>
+        <input type="password" id="new_password" name="new_password" minlength="8" autocomplete="new-password" required>
+        <label for="confirm_password">Confirm new password</label>
+        <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
+        <div class="form-actions"><button class="btn" type="submit">Change password</button></div>
+      </form>
+    </div>
+  </div>
+  {% if g.user.role == 'user' %}
+  <div class="card table-wrap mt">
+    <h2>Voting history</h2>
+    {% if history %}
+      <table>
+        <thead><tr><th>Election</th><th>Voted at</th></tr></thead>
+        <tbody>{% for h in history %}<tr><td>{{ h.title }}</td><td>{{ h.voted_at|dt }}</td></tr>{% endfor %}</tbody>
+      </table>
+      <p class="hint">We record that you voted, never who you voted for.</p>
+    {% else %}
+      <div class="empty">You have not voted yet.</div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
