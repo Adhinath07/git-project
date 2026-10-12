@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Fair, simple, secure voting</h1>
+  <p>Register once, vote once in every election, and see the official results the moment they are published.</p>
+  <div class="actions">
+    {% if g.user %}
+      <a class="btn" href="{{ url_for('dashboard') }}">Go to dashboard</a>
+    {% else %}
+      <a class="btn" href="{{ url_for('register') }}">Create an account</a>
+      <a class="btn secondary" href="{{ url_for('login') }}">Log in</a>
+    {% endif %}
+  </div>
+</section>
+
+<section class="grid cols-3">
+  <div class="card stat"><div class="num">{{ stats.open }}</div><div class="label">Elections open now</div></div>
+  <div class="card stat"><div class="num">{{ stats.published }}</div><div class="label">Results published</div></div>
+  <div class="card stat"><div class="num">{{ stats.voters }}</div><div class="label">Registered voters</div></div>
+</section>
+
+<section class="page">
+  <h2>Open elections</h2>
+  {% if open_elections %}
+    <div class="grid cols-3">
+      {% for e in open_elections %}
+        <div class="card">
+          <h3>{{ e.title }}</h3>
+          <p class="muted small">{{ e.description or 'No description.' }}</p>
+          {% if g.user and g.user.role == 'user' %}
+            <a class="btn sm" href="{{ url_for('vote', election_id=e.id) }}">Vote</a>
+          {% elif not g.user %}
+            <a class="btn sm secondary" href="{{ url_for('login') }}">Log in to vote</a>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card empty">No elections are open right now. Check back soon.</div>
+  {% endif %}
+</section>
+{% endblock %}
