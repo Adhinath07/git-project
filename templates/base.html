@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Home{% endblock %} · SecureVote</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="{{ url_for('home') }}">SecureVote</a>
+    <nav>
+      {% set ep = request.endpoint %}
+      {% if g.user and g.user.role == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}" class="{{ 'active' if ep == 'admin_dashboard' }}">Dashboard</a>
+        <a href="{{ url_for('manage_elections') }}" class="{{ 'active' if ep in ('manage_elections',) }}">Elections</a>
+        <a href="{{ url_for('manage_candidates') }}" class="{{ 'active' if ep == 'manage_candidates' }}">Candidates</a>
+        <a href="{{ url_for('publish_result') }}" class="{{ 'active' if ep == 'publish_result' }}">Publish results</a>
+        <a href="{{ url_for('profile') }}" class="{{ 'active' if ep == 'profile' }}">Profile<span class="badge-admin">admin</span></a>
+      {% elif g.user %}
+        <a href="{{ url_for('dashboard') }}" class="{{ 'active' if ep == 'dashboard' }}">Dashboard</a>
+        <a href="{{ url_for('vote_list') }}" class="{{ 'active' if ep in ('vote_list', 'vote') }}">Vote</a>
+        <a href="{{ url_for('result') }}" class="{{ 'active' if ep in ('result', 'result_detail') }}">Results</a>
+        <a href="{{ url_for('profile') }}" class="{{ 'active' if ep == 'profile' }}">Profile</a>
+      {% else %}
+        <a href="{{ url_for('home') }}" class="{{ 'active' if ep == 'home' }}">Home</a>
+        <a href="{{ url_for('result') }}" class="{{ 'active' if ep in ('result', 'result_detail') }}">Results</a>
+        <a href="{{ url_for('login') }}" class="{{ 'active' if ep == 'login' }}">Login</a>
+        <a href="{{ url_for('register') }}" class="{{ 'active' if ep == 'register' }}">Register</a>
+      {% endif %}
+      {% if g.user %}
+        <form method="post" action="{{ url_for('logout') }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="link">Logout ({{ g.user.username }})</button>
+        </form>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}" role="status">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<footer><div class="container">SecureVote · one person, one vote</div></footer>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
