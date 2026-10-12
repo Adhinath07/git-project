@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <div><h1>Admin dashboard</h1><p class="muted">Overview of voters, elections and ballots.</p></div>
+    <a class="btn" href="{{ url_for('manage_elections') }}">New election</a>
+  </div>
+  <div class="grid cols-3">
+    <div class="card stat"><div class="num">{{ stats.users }}</div><div class="label">Registered voters</div></div>
+    <div class="card stat"><div class="num">{{ stats.draft }}</div><div class="label">Draft elections</div></div>
+    <div class="card stat"><div class="num">{{ stats.open }}</div><div class="label">Open elections</div></div>
+    <div class="card stat"><div class="num">{{ stats.closed }}</div><div class="label">Closed elections</div></div>
+    <div class="card stat"><div class="num">{{ stats.ballots }}</div><div class="label">Ballots cast (all time)</div></div>
+    <div class="card stat"><div class="num">{{ stats.awaiting }}</div><div class="label">Closed, results not published</div></div>
+  </div>
+  <div class="card table-wrap mt">
+    <h2>Recent elections</h2>
+    {% if recent %}
+    <table>
+      <thead><tr><th>Election</th><th>Status</th><th>Candidates</th><th>Votes</th><th>Results</th></tr></thead>
+      <tbody>
+      {% for e in recent %}
+        <tr>
+          <td>{{ e.title }}</td>
+          <td><span class="pill {{ e.status }}">{{ e.status }}</span></td>
+          <td>{{ e.n_candidates }}</td>
+          <td>{{ e.n_votes }}</td>
+          <td>{% if e.results_published %}<span class="pill published">published</span>{% else %}<span class="muted">hidden</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty">No elections yet. <a href="{{ url_for('manage_elections') }}">Create the first one.</a></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
