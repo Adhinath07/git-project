@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }}{% endblock %}
+{% block content %}
+<div class="error-page">
+  <div class="code">{{ code }}</div>
+  <h1>{% if code == 404 %}Page not found{% elif code == 403 %}Not allowed{% else %}Something went wrong{% endif %}</h1>
+  <p class="muted">{{ message }}</p>
+  <p><a class="btn" href="{{ url_for('home') }}">Back to home</a></p>
+</div>
+{% endblock %}
