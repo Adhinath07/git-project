@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Manage elections{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head"><div><h1>Manage elections</h1><p class="muted">Create an election, add candidates, open it for voting, then close it.</p></div></div>
+
+  <div class="card">
+    <h2>Create election</h2>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="title">Title</label>
+      <input type="text" id="title" name="title" minlength="3" maxlength="120" required>
+      <label for="description">Description (optional)</label>
+      <textarea id="description" name="description" maxlength="1000"></textarea>
+      <div class="form-actions"><button class="btn" type="submit">Create draft</button></div>
+    </form>
+  </div>
+
+  <div class="card table-wrap">
+    <h2>All elections</h2>
+    {% if elections %}
+    <table>
+      <thead><tr><th>Election</th><th>Status</th><th>Candidates</th><th>Votes</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for e in elections %}
+        <tr>
+          <td>
+            <strong>{{ e.title }}</strong>
+            <div class="muted small">Created {{ e.created_at|dt }}</div>
+            {% if e.status == 'draft' %}
+            <details>
+              <summary>Edit details</summary>
+              <form method="post" action="{{ url_for('edit_election', election_id=e.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="title" value="{{ e.title }}" minlength="3" maxlength="120" required>
+                <textarea name="description" maxlength="1000">{{ e.description }}</textarea>
+                <div class="form-actions"><button class="btn sm" type="submit">Save</button></div>
+              </form>
+            </details>
+            {% endif %}
+          </td>
+          <td><span class="pill {{ e.status }}">{{ e.status }}</span></td>
+          <td>{{ e.n_candidates }}</td>
+          <td>{{ e.n_votes }}</td>
+          <td>
+            <div class="row-actions">
+              {% if e.status == 'draft' %}
+                <a class="btn sm secondary" href="{{ url_for('manage_candidates', election=e.id) }}">Candidates</a>
+                <form method="post" action="{{ url_for('set_election_status', election_id=e.id) }}" class="inline" data-confirm="Open this election? Candidates can no longer be changed.">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="open">
+                  <button class="btn sm" type="submit">Open</button>
+                </form>
+              {% elif e.status == 'open' %}
+                <form method="post" action="{{ url_for('set_election_status', election_id=e.id) }}" class="inline" data-confirm="Close this election? Voting will stop.">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="close">
+                  <button class="btn sm" type="submit">Close</button>
+                </form>
+              {% else %}
+                <a class="btn sm secondary" href="{{ url_for('publish_result') }}">Results</a>
+              {% endif %}
+              {% if e.status != 'open' %}
+                <form method="post" action="{{ url_for('delete_election', election_id=e.id) }}" class="inline" data-confirm="Delete this election and all its votes? This cannot be undone.">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn sm danger" type="submit">Delete</button>
+                </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty">No elections yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
